@@ -1,0 +1,240 @@
+##Sudoku Solver -- Using Recursion Function##
+0 jumpn 178 #:main:
+
+##Board Functionality Checks##
+
+#:check:
+1 jnezn r7 95 #:boardnotdone: 
+2 addn r7 8 #Need to set r7 to 8 -- after check func need to subtract r13 by 8 to get to the last character in board
+3 setn r3 0
+4 setn r4 0
+5 setn r5 0
+#Check first row; SBP should start at 255
+6 loadr r4 r13
+7 addn r13 -1
+8 loadr r5 r13
+9 add r4 r4 r5
+10 addn r13 -1
+11 loadr r5 r13
+12 add r4 r4 r5
+13 addn r4 -7
+14 jnezn r4 77 #:falseboard: #If r4 -7 is not equal to zero the board is not complete
+#Check second row; SBP at 253 now
+15 addn r13 -1
+16 loadr r4 r13
+17 addn r13 -1
+18 loadr r5 r13
+19 add r4 r4 r5
+20 addn r13 -1
+21 loadr r5 r13
+22 add r4 r4 r5
+23 addn r4 -7
+24 jnezn r4 77 #:falseboard: 
+#Check third row; SBP at 250
+25 addn r13 -1 
+26 loadr r4 r13
+27 addn r13 -1
+28 loadr r5 r13
+29 add r4 r4 r5
+30 addn r13 -1
+31 loadr r5 r13
+32 add r4 r4 r5
+33 addn r4 -7
+34 jnezn r4 77 #:falseboard:
+#Check first col; SBP at 247
+35 addn r13 8
+36 loadr r4 r13
+37 addn r13 -3
+38 loadr r5 r13
+39 add r4 r4 r5
+40 addn r13 -3
+41 loadr r5 r13
+42 add r4 r4 r5
+43 addn r4 -7
+44 jnezn r4 77 #:falseboard:
+#Check second col; SBP at 249
+45 addn r13 5
+46 loadr r4 r13
+47 addn r13 -3
+48 loadr r5 r13
+49 add r4 r4 r5
+50 addn r13 -3
+51 loadr r5 r13
+52 add r4 r4 r5
+53 addn r4 -7
+54 jnezn r4 77 #:falseboard:
+#Check third col; SBP at 248
+55 addn r13 5
+56 loadr r4 r13
+57 addn r13 -3
+58 loadr r5 r13
+59 add r4 r4 r5
+60 addn r13 -3
+61 loadr r5 r13
+62 add r4 r4 r5
+63 addn r4 -7
+64 jnezn r4 77 #:falseboard:
+#SBP atp is at 247
+65 addn r13 8 #Reset SBP to 255
+66 jumpn 67 #:correctboard: #Jump to correctboard if board is correct
+
+#:correctboard:
+67 setn r2 9 #Create a counter for loop
+#:print:
+68 loadr r3 r13
+69 write r3 #Print value
+70 addn r13 -1 #Move to next value in board
+71 addn r2 -1 #Subtract from r2 (countdown)
+72 jnezn r2 68 #:print:
+73 halt
+
+#:fail:
+74 setn r3 -1
+75 write r3
+76 halt
+
+#:falseboard:
+77 setn r13 127
+78 add r13 r13 r13
+79 addn r13 1 #Set r13 back to 255
+           #There is an empty stack frame here so we need to go back
+80 setn r7 0
+81 addn r15 -2
+82 storer r7 r15 #Set the char value of 9 back to zero
+83 addn r15 2 
+84 setn r7 8
+85 addn r15 3 
+86 setn r3 0
+87 setn r4 0
+88 setn r5 0
+89 jumpn 123 #:goback:
+
+##Fill Function Checks##
+#:fill:
+90 addn r15 -2 #r15 points to character value
+91 loadr r7 r15
+92 addn r15 2 #Sets r15 back to SPB 
+93 addn r7 -9
+94 jumpn 1 #:check: #If all 9 characters are filled -- then check
+#:boardnotdone:
+95 addn r7 9
+96 sub r13 r13 r7 #r13 now points to current space on board we are checking
+97 loadr r12 r13 #r12 to check value
+98 add r13 r13 r7 #r13 points back to first value in board
+99 jnezn r12 155 #:mfin: #If this spot in board is not a zero -- move to the next one
+#:tryone:
+100 sub r13 r13 r7 #r13 points at current space again
+101 setn r1 1 
+102 storer r1 r13 #Try 1 in the empty spot
+103 add r13 r13 r7 #Reset board pointer
+104 calln r6 159 #:makeframe: #Continue to the next spot in board
+#:trytwo:
+105 sub r13 r13 r7 #Board pointer now points to current spot
+106 setn r1 2
+107 storer r1 r13 #Try 2 in the empty spot
+108 add r13 r13 r7 #Reset board pointer
+109 calln r6 159 #:makeframe: #Continue to next space
+#:tryfour:
+110 sub r13 r13 r7 #Board pointer is now at current spot
+111 setn r1 4 
+112 storer r1 r13 #Try 4 in empty spot
+113 add r13 r13 r7 #Reset board pointer
+114 calln r6 159 #:makeframe: #Move to next stackframe
+##GO BACK A STACK##
+115 jeqzn r7 74 #:fail:
+116 loadr r15 r15 #Goes to previous SBP
+117 addn r15 -1 #Go to prev stack's return pointer
+118 loadr r6 r15
+119 addn r15 -1 #Go to char value
+120 loadr r7 r15
+121 addn r15 2 #Go to prev stack's SBP
+122 jeqzn r6 132 #:inputnumber: #If this space in the board was entered by the user, do something else
+
+#:goback:
+123 addn r15 -1 #Go to return pointer
+124 loadr r6 r15 #Load r6 with return jump
+125 addn r15 1 #r15 goes back to SBP
+126 jeqzn r6 132 #:inputnumber: #If this number was already set by the user, then do something else
+127 sub r13 r13 r7 #Board pointer points to current space
+128 setn r1 0
+129 storer r1 r13 #Set value to 0
+130 add r13 r13 r7 #Reset board pointer 
+131 jumpr r6 #Jump to where we left off before we tried current number
+
+#:inputnumber:
+132 jeqzn r7 74 #:fail: #If this is the first number in the board, then fail
+133 addn r15 1 #Go to previous stack char value
+134 loadr r7 r15 #Load it to r7
+135 addn r15 2 #Go to previous SBP
+136 jumpn 123 #:goback:
+
+#:firstnum:
+137 loadr r3 r13
+138 addn r3 -1
+139 jeqzn r3 105 #:trytwo:
+140 addn r3 -1
+141 jeqzn r3 110 #:tryfour:
+142 jumpn 74 #:fail: 
+
+##MAKE FRAME FUNCTION##
+#:firstmakeframe: #After building board pointer is already at next open space
+143 copy r14 r15
+144 addn r15 -1
+145 storer r14 r15 #SBP points to caller
+146 addn r15 -2 #Point to char value
+147 setn r7 0 #r7 holds char info
+148 storer r7 r15 #Enter value 0
+149 loadr r1 r13 
+150 addn r15 1 #Go to return val
+151 jnezn r1 153 #:enterednum:
+152 storer r6 r15
+#:enterednum:
+153 addn r15 1 #Return the active SBP to current SBP
+154 jumpn 90 #:fill:
+
+
+#:mfin: #Make frame input number
+155 addn r15 -1
+156 setn r6 0
+157 storer r6 r15
+158 addn r15 1
+
+#:makeframe:
+159 addn r15 -2 #Point to char value
+160 loadr r7 r15 #Get char value
+161 addn r15 2 #SPB
+162 addn r15 -1 #r15 points to return pointer
+163 storer r6 r15 #Store return instruction
+164 addn r15 1 #r15 points to SBP
+165 addn r7 -9
+166 jeqzn r7 90 #:fill: #If all the spaces are filled -- go back to fill to check board
+167 addn r7 9
+##MAKE FRAME##
+168 copy r14 r15
+169 addn r15 -3 #r15 points to newest empty memory spot
+170 storer r14 r15 #SBP points to last one
+171 addn r15 1 #Points to previous character value
+172 loadr r7 r15 #Set r7 to character value in prev stack frame
+173 addn r7 1 #Increment character value by 1
+174 addn r15 -3 #Points to new stack frame character value
+175 storer r7 r15 #Store character value
+176 addn r15 2 #Points back to SBP
+177 jumpn 90 #:fill:
+
+##MAIN##
+#:main:
+178 setn r15 127
+179 add r15 r15 r15
+180 addn r15 1
+181 copy r13 r15 #r13 is the pointer for the board 
+#r15 is the active stack pointer, starting at 255
+182 setn r2 9 #Counter for num of inputs
+#:read:
+183 read r1
+184 storer r1 r15
+185 addn r2 -1
+186 addn r15 -1
+187 jnezn r2 183 #:read: #When loop ends -- r15 is at 246 -- r2 is at 0
+188 setn r7 0
+189 calln r6 143 #:firstmakeframe:
+190 jumpn 74 #:fail:
